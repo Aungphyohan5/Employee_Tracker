@@ -76,6 +76,90 @@ const role = [
     }
 ];
 
+const employee = [
+    {
+        type: 'input',
+        name: 'firstName',
+        message: 'What is the employee’s first name?'
+    },
+    {
+        type: 'input',
+        name: 'lastName',
+        message: 'What is the employee’s last name?'
+    },
+    {
+        type: 'list',
+        name: 'employeeRole',
+        message: 'What is the employee’s role?',
+        choices:
+            [
+                'Sales Lead',
+                'Salesperson',
+                'Lead Engineer',
+                'Account Manager',
+                'Accountant',
+                'Legal Team Lead',
+                'Lawyer',
+                'Customer Service'
+            ]
+    },
+    {
+        type: 'list',
+        name: 'employeeManager',
+        message: 'Who is the employee’s manager?',
+        choices:
+            [
+                'None',
+                'John Doe',
+                'Mike chan',
+                'Ashley Rodriguez',
+                'Kevin Tupik',
+                'Kuala Singh',
+                'Mail Brown'
+            ]
+    }
+];
+
+
+const updateEmployee = [
+    {
+        type: 'list',
+        name: 'employeeName',
+        message: 'Which employee’s role do you want to update?',
+        choices:
+            [
+                'John Doe',
+                'Mike chan',
+                'Ashley Rodriguez',
+                'Kevin Tupik',
+                'Kuala Singh',
+                'Mail Brown',
+                'Sarah Lourd',
+                'Tom Allen',
+                'Sam Kash'
+
+            ]
+    },
+    {
+        type: 'list',
+        name: 'newRole',
+        message: 'What role do you want to assign the selected employee?',
+        choices:
+            [
+                'Sales Lead',
+                'Salesperson',
+                'Lead Engineer',
+                'Account Manager',
+                'Accountant',
+                'Legal Team Lead',
+                'Lawyer',
+                'Customer Service'
+
+            ]
+    }
+
+]
+
 inquirer.prompt(question).then((answer) => {
     console.log(answer);
 })
