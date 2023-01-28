@@ -9,7 +9,7 @@ USE employee_db;
 CREATE TABLE department (
     id INT,
     name VARCHAR(30),
-  PRIMARY KEY(id)
+    PRIMARY KEY(id)
 );
 
 -- create role table --

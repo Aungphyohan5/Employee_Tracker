@@ -20,6 +20,7 @@
   "homepage": "https://github.com/Aungphyohan5/Employee_Tracker#readme",
   "dependencies": {
     "express": "^4.18.2",
+    "inquirer": "^8.2.4",
     "mysql2": "^3.0.1"
   }
 }
