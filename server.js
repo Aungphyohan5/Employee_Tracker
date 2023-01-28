@@ -19,3 +19,14 @@ const db = mysql.createConnection(
 
 
 
+// Query database
+db.query('SELECT * FROM employee', function (err, results) {
+    console.log(results);
+});
+
+// Default response for any bad request
+app.use((req, res) => { res.status(404).end() });
+
+app.listen(PORT, () => {
+    console.log(`server running on ${PORT}`);
+});
