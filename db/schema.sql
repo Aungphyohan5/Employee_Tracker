@@ -33,4 +33,5 @@ CREATE TABLE employee (
     FOREIGN KEY (role_id)
     REFERENCES role(id)
     PRIMARY KEY(id)
+    ON DELETE SET NULL
 );
