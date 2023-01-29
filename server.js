@@ -45,7 +45,7 @@ const question = [
         type: 'list',
         name: 'option',
         message: 'What would you like to do?',
-        choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department']
+        choices: ['View All Employees', 'Add_Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department']
     }
 ];
 
@@ -169,22 +169,73 @@ function init() {
             db.query('SELECT * FROM employee', function (err, results) {
                 console.table(results);
                 init()
-            });
+            })
         };
+
         if (answers.option === 'View All Roles') {
             db.query('SELECT * FROM role', function (err, results) {
                 console.table(results);
                 init()
-            });
+            })
         };
+
         if (answers.option === 'View All Departments') {
             db.query('SELECT * FROM department', function (err, results) {
                 console.table(results);
                 init()
-            });
+            })
         };
-    })
-}
+
+        if (answers.option === 'Add_Employee') {
+            inquirer.prompt(employee).then(answers => {
+                console.log(answers);
+                // db.query('INSERT INTO employee SET ?(first_name, last_name, role_id, manager_id', {
+                //     first_name: answers.firstName,
+                //     last_name: answers.lastName,
+                //     role_id: answers.employeeRole,
+                //     manager_id: employeeManager
+                // })
+            })
+        };
+
+        if (answers.option === 'Update Employee Role') {
+            inquirer.prompt(updateEmployee).then(answers => {
+                console.log(answers);
+                // db.query('INSERT INTO employee SET ?(first_name, last_name, role_id, manager_id', {
+                //     first_name: answers.firstName,
+                //     last_name: answers.lastName,
+                //     role_id: answers.employeeRole,
+                //     manager_id: employeeManager
+                // })
+            })
+        };
+
+        if (answers.option === 'Add Role') {
+            inquirer.prompt(role).then(answers => {
+                console.log(answers);
+                // db.query('INSERT INTO employee SET ?(first_name, last_name, role_id, manager_id', {
+                //     first_name: answers.firstName,
+                //     last_name: answers.lastName,
+                //     role_id: answers.employeeRole,
+                //     manager_id: employeeManager
+                // })
+            })
+        };
+
+        if (answers.option === 'Add Department') {
+            inquirer.prompt(department).then(answers => {
+                console.log(answers);
+                // db.query('INSERT INTO employee SET ?(first_name, last_name, role_id, manager_id', {
+                //     first_name: answers.firstName,
+                //     last_name: answers.lastName,
+                //     role_id: answers.employeeRole,
+                //     manager_id: employeeManager
+                // })
+            })
+        };
+    });
+
+};
 
 
 
