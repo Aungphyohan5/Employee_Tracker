@@ -5,6 +5,7 @@ const cTable = require('console.table');
 
 
 
+
 const PORT = process.env.PORT || 3001;
 const app = express();
 
@@ -69,13 +70,13 @@ const role = [
         type: 'input',
         name: 'role_salary',
         message: 'What is the salary of the role?'
-    },
-    {
-        type: 'list',
-        name: 'role_department',
-        message: 'Which department does the role belong to?',
-        choices: ['Engineering', 'Finance', 'Legal', 'Sales', 'Service']
     }
+    // {
+    //     type: 'list',
+    //     name: 'role_department',
+    //     message: 'Which department does the role belong to?',
+    //     choices: ['Engineering', 'Finance', 'Legal', 'Sales', 'Service']
+    // }
 ];
 
 // to add employee
@@ -213,14 +214,23 @@ function init() {
         if (answers.option === 'Add Role') {
             inquirer.prompt(role).then(answers => {
                 console.log(answers);
-                // db.query('INSERT INTO employee SET ?(first_name, last_name, role_id, manager_id', {
-                //     first_name: answers.firstName,
-                //     last_name: answers.lastName,
-                //     role_id: answers.employeeRole,
-                //     manager_id: employeeManager
-                // })
+                const roleName = answers.role_name
+                const roleSalary = answers.role_salary
+                const roleDepartment = answers.role_department
+                var sql = "INSERT INTO role (title, salary, department_id) VALUES ?";
+                var values = [
+                    [roleName, roleSalary, roleDepartment]
+                ];
+
+                db.query(sql, [values], function (err, result) {
+                    title: roleName;
+                    salary: roleSalary;
+                    department_id: roleDepartment
+                    console.log(`Added New Role.`)
+                })
             })
         };
+
 
         if (answers.option === 'Add Department') {
             inquirer.prompt(department).then(answers => {
