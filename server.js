@@ -1,6 +1,7 @@
 const express = require('express');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+const cTable = require('console.table');
 
 
 
@@ -35,19 +36,20 @@ db.query('SELECT * FROM role', function (err, results) {
 });
 
 db.query('SELECT * FROM employee', function (err, results) {
-    // console.log(results);
+    // console.table(results);
 });
 
 // inquirer questions
 const question = [
     {
         type: 'list',
-        name: 'questions',
+        name: 'option',
         message: 'What would you like to do?',
         choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department']
     }
 ];
 
+// To add department
 const department = [
     {
         type: 'input',
@@ -56,7 +58,7 @@ const department = [
     }
 ];
 
-
+// To add a role
 const role = [
     {
         type: 'input',
@@ -76,6 +78,7 @@ const role = [
     }
 ];
 
+// to add employee
 const employee = [
     {
         type: 'input',
@@ -120,7 +123,7 @@ const employee = [
     }
 ];
 
-
+// To update the employee Role
 const updateEmployee = [
     {
         type: 'list',
@@ -160,10 +163,32 @@ const updateEmployee = [
 
 ]
 
-inquirer.prompt(question).then((answer) => {
-    console.log(answer);
-})
+function init() {
+    inquirer.prompt(question).then(answers => {
+        if (answers.option === 'View All Employees') {
+            db.query('SELECT * FROM employee', function (err, results) {
+                console.table(results);
+                init()
+            });
+        };
+        if (answers.option === 'View All Roles') {
+            db.query('SELECT * FROM role', function (err, results) {
+                console.table(results);
+                init()
+            });
+        };
+        if (answers.option === 'View All Departments') {
+            db.query('SELECT * FROM department', function (err, results) {
+                console.table(results);
+                init()
+            });
+        };
+    })
+}
 
+
+
+init()
 // Default response for any bad request
 app.use((req, res) => { res.status(404).end() });
 
