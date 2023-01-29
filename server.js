@@ -225,12 +225,14 @@ function init() {
         if (answers.option === 'Add Department') {
             inquirer.prompt(department).then(answers => {
                 console.log(answers);
-                // db.query('INSERT INTO employee SET ?(first_name, last_name, role_id, manager_id', {
-                //     first_name: answers.firstName,
-                //     last_name: answers.lastName,
-                //     role_id: answers.employeeRole,
-                //     manager_id: employeeManager
-                // })
+                const sql = `INSERT INTO department(name)
+                VALUES (?)`;
+                const newDept = answers.add_department;
+                db.query(sql, newDept, function (err, result) {
+                    name: newDept;
+                    console.log(`Added New Department`)
+                })
+
             })
         };
     });
