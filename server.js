@@ -118,45 +118,7 @@ const department = [
 // to add employee
 
 
-// To update the employee Role
-const updateEmployee = [
-    {
-        type: 'list',
-        name: 'employeeName',
-        message: 'Which employee’s role do you want to update?',
-        choices:
-            [
-                'John Doe',
-                'Mike chan',
-                'Ashley Rodriguez',
-                'Kevin Tupik',
-                'Kuala Singh',
-                'Mail Brown',
-                'Sarah Lourd',
-                'Tom Allen',
-                'Sam Kash'
 
-            ]
-    },
-    {
-        type: 'list',
-        name: 'newRole',
-        message: 'What role do you want to assign the selected employee?',
-        choices:
-            [
-                'Sales Lead',
-                'Salesperson',
-                'Lead Engineer',
-                'Account Manager',
-                'Accountant',
-                'Legal Team Lead',
-                'Lawyer',
-                'Customer Service'
-
-            ]
-    }
-
-]
 
 function init() {
     inquirer.prompt(question).then(answers => {
@@ -264,21 +226,53 @@ function init() {
         };
 
         if (answers.option === 'Update Employee Role') {
-            inquirer.prompt(updateEmployee).then(answers => {
-                console.log(answers);
-                const employeeName = answers.employeeName
-                const updatedRole = answers.newRole
-                var sql = "UPDATE employee SET = employeeName WHERE name= ";
-                var values = [
-                    [employeeName, updatedRole]
-                ];
+            db.query(`SELECT * FROM employee`, function (err, result) {
+                // To update the employee Role
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'employeeName',
+                        message: 'Which employee’s role do you want to update?',
+                        choices: () => {
+                            const employee = result.map(({ first_name, last_name }) => ({ name: first_name + '' + last_name }));
+                            return employee
+                        }
 
-                db.query(sql, [values], function (err, result) {
-                    title: employeeName;
-                    salary: updatedRole;
-                    console.log(`Updated Employee's New Role.`)
+                    }
+
+
+                ]).then(answers => {
+                    console.log(answers);
+                    const employeeName = answers.employeeName
+
+                    db.query(`SELECT * FROM role`, function (err, result) {
+                        inquirer.prompt([
+                            {
+                                type: 'list',
+                                name: 'newRole',
+                                message: 'What role do you want to assign the selected employee?',
+                                choices: () => {
+                                    const role = result.map(({ title }) => ({ name: title }));
+                                    return role
+                                }
+
+                            }
+                        ])
+
+                        // db.query(sql, [values], function (err, result) {
+                        //     title: employeeName;
+                        //     salary: updatedRole;
+                        //     console.log(`Updated Employee's New Role.`)
+                        //     init()
+                        // })
+                    })
                 })
+
+
+
             })
+
+
         };
 
         if (answers.option === 'Add Role') {
