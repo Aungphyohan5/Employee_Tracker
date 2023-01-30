@@ -23,18 +23,41 @@ const db = mysql.createConnection(
         database: 'employee_db'
     },
     console.log(`Connected to the employee_db database`)
-);
+)
 
 
 
 // Query database
-db.query('SELECT * FROM department', function (err, results) {
-    // console.table(results);
-});
+
+
+// let viewAllDept = [];
+// const deptSql = 'SELECT * FROM department'
+// db.query(deptSql, (err, data) => {
+//     if (err) throw err;
+
+//     const dept = data.map(({ name }) => ({ name: name }));
+
+//     viewAllDept.push(dept)
+//     // console.log(viewAllDept)
+
+// })
+
+
+
+
+
+
+
+
+
+
+
 
 db.query('SELECT * FROM role', function (err, results) {
     // console.log(results);
 });
+
+
 
 db.query('SELECT * FROM employee', function (err, results) {
     // console.table(results);
@@ -60,69 +83,40 @@ const department = [
 ];
 
 // To add a role
-const role = [
-    {
-        type: 'input',
-        name: 'role_name',
-        message: 'What is the name of the role?'
-    },
-    {
-        type: 'input',
-        name: 'role_salary',
-        message: 'What is the salary of the role?'
-    }
-    // {
-    //     type: 'list',
-    //     name: 'role_department',
-    //     message: 'Which department does the role belong to?',
-    //     choices: ['Engineering', 'Finance', 'Legal', 'Sales', 'Service']
-    // }
-];
+// const role = [
+//     {
+//         type: 'input',
+//         name: 'role_name',
+//         message: 'What is the name of the role?'
+//     },
+//     {
+//         type: 'input',
+//         name: 'role_salary',
+//         message: 'What is the salary of the role?'
+//     },
+
+//     {
+//         type: 'list',
+//         name: 'role_department',
+//         message: 'Which department does the role belong to?',
+//         choices: () => {
+//             let viewAllDept = [];
+//             const deptSql = 'SELECT * FROM department'
+//             db.query(deptSql, (err, data) => {
+//                 if (err) throw err;
+
+//                 const dept = data.map(({ name }) => ({ name: name }));
+
+//                 viewAllDept.push(dept)
+//                 return viewAllDept;
+
+//             })
+//         }
+//     }
+// ];
 
 // to add employee
-const employee = [
-    {
-        type: 'input',
-        name: 'firstName',
-        message: 'What is the employee’s first name?'
-    },
-    {
-        type: 'input',
-        name: 'lastName',
-        message: 'What is the employee’s last name?'
-    },
-    {
-        type: 'list',
-        name: 'employeeRole',
-        message: 'What is the employee’s role?',
-        choices:
-            [
-                'Sales Lead',
-                'Salesperson',
-                'Lead Engineer',
-                'Account Manager',
-                'Accountant',
-                'Legal Team Lead',
-                'Lawyer',
-                'Customer Service'
-            ]
-    },
-    {
-        type: 'list',
-        name: 'employeeManager',
-        message: 'Who is the employee’s manager?',
-        choices:
-            [
-                'None',
-                'John Doe',
-                'Mike chan',
-                'Ashley Rodriguez',
-                'Kevin Tupik',
-                'Kuala Singh',
-                'Mail Brown'
-            ]
-    }
-];
+
 
 // To update the employee Role
 const updateEmployee = [
@@ -167,14 +161,24 @@ const updateEmployee = [
 function init() {
     inquirer.prompt(question).then(answers => {
         if (answers.option === 'View All Employees') {
-            db.query('SELECT * FROM employee', function (err, results) {
-                console.table(results);
-                init()
-            })
+            db.query(`SELECT employee.id AS ID, employee.first_name AS First_Name, employee.last_name AS LAST_Name, role.title AS Title, role.salary AS Salary, department.name AS Department,
+            manager_id AS manager
+            from employee
+            INNER JOIN role ON employee.role_id = role.id
+            INNER JOIN department ON role.department_id = department.id
+            
+        
+            `,
+                function (err, results) {
+                    console.table(results);
+                    init()
+                })
         };
 
         if (answers.option === 'View All Roles') {
-            db.query('SELECT * FROM role', function (err, results) {
+            db.query(`SELECT role.id AS id, role.title AS title, role.salary as salary, department.name as department
+                FROM role 
+                INNER JOIN department on role.department_id = department.id`, function (err, results) {
                 console.table(results);
                 init()
             })
@@ -186,49 +190,151 @@ function init() {
                 init()
             })
         };
-
+        // Add employee
         if (answers.option === 'Add_Employee') {
-            inquirer.prompt(employee).then(answers => {
-                console.log(answers);
-                // db.query('INSERT INTO employee SET ?(first_name, last_name, role_id, manager_id', {
-                //     first_name: answers.firstName,
-                //     last_name: answers.lastName,
-                //     role_id: answers.employeeRole,
-                //     manager_id: employeeManager
-                // })
+            db.query(`SELECT * FROM role`, function (err, result) {
+
+                const roles = result.map(({ title }) => ({ name: title }));
+
+                inquirer.prompt([
+                    {
+                        type: 'input',
+                        name: 'firstName',
+                        message: 'What is the employee’s first name?'
+                    },
+                    {
+                        type: 'input',
+                        name: 'lastName',
+                        message: 'What is the employee’s last name?'
+                    },
+                    {
+                        type: 'list',
+                        name: 'employeeRole',
+                        message: 'What is the employee’s role?',
+                        choices: roles
+
+                    },
+                    {
+                        type: 'list',
+                        name: 'employeeManager',
+                        message: 'Who is the employee’s manager?',
+                        choices:
+                            [
+                                'None',
+                                'John Doe',
+                                'Mike chan',
+                                'Ashley Rodriguez',
+                                'Kevin Tupik',
+                                'Kuala Singh',
+                                'Mail Brown'
+                            ]
+                    }
+                ]).then(answers => {
+                    for (var i = 0; i < result.length; i++) {
+                        if (result[i].title === answers.employeeRole) {
+                            var employee_Role = result[i];
+                        }
+                    }
+
+                    console.log(answers);
+                    const firstName = answers.firstName;
+                    const lastName = answers.lastName;
+                    const managerId = answers.employeeManager;
+
+
+
+                    // console.log(firstName, lastName, employee_Role.id, employee_Manager.id)
+                    var sql = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ?"; // reference from :: https://www.w3schools.com/nodejs/nodejs_mysql_insert.asp
+                    var values = [
+                        [firstName, lastName, employee_Role.id, managerId]
+                    ];
+
+                    db.query(sql, [values], function (err, result) {
+                        first_name: firstName
+                        last_name: lastName
+                        role_id: employee_Role.id
+                        manager_id: managerId
+                        console.log(`Added New Employeee`)
+                    })
+                    init()
+                })
+
             })
+
         };
 
         if (answers.option === 'Update Employee Role') {
             inquirer.prompt(updateEmployee).then(answers => {
                 console.log(answers);
-                // db.query('INSERT INTO employee SET ?(first_name, last_name, role_id, manager_id', {
-                //     first_name: answers.firstName,
-                //     last_name: answers.lastName,
-                //     role_id: answers.employeeRole,
-                //     manager_id: employeeManager
-                // })
+                const employeeName = answers.employeeName
+                const updatedRole = answers.newRole
+                var sql = "UPDATE employee SET = employeeName WHERE name= ";
+                var values = [
+                    [employeeName, updatedRole]
+                ];
+
+                db.query(sql, [values], function (err, result) {
+                    title: employeeName;
+                    salary: updatedRole;
+                    console.log(`Updated Employee's New Role.`)
+                })
             })
         };
 
         if (answers.option === 'Add Role') {
-            inquirer.prompt(role).then(answers => {
-                console.log(answers);
-                const roleName = answers.role_name
-                const roleSalary = answers.role_salary
-                const roleDepartment = answers.role_department
-                var sql = "INSERT INTO role (title, salary, department_id) VALUES ?";
-                var values = [
-                    [roleName, roleSalary, roleDepartment]
-                ];
 
-                db.query(sql, [values], function (err, result) {
-                    title: roleName;
-                    salary: roleSalary;
-                    department_id: roleDepartment
-                    console.log(`Added New Role.`)
-                })
+            db.query(`SELECT * FROM department`, function (err, result) {
+
+                inquirer.prompt([
+                    {
+                        type: 'input',
+                        name: 'role_name',
+                        message: 'What is the name of the role?'
+                    },
+                    {
+                        type: 'input',
+                        name: 'role_salary',
+                        message: 'What is the salary of the role?'
+                    },
+
+                    {
+                        type: 'list',
+                        name: 'role_department',
+                        message: 'Which department does the role belong to?',
+                        choices: () => {
+                            const dept = result.map(({ name }) => ({ name: name }));
+                            return dept
+                        }
+                    }
+                ])
+                    .then(answers => {
+                        for (var i = 0; i < result.length; i++) {
+                            if (result[i].name === answers.role_department) {
+                                var departmentId = result[i];
+                            }
+                        }
+                        console.log(answers);
+                        const roleName = answers.role_name
+                        const roleSalary = answers.role_salary
+
+                        console.log(roleName, roleSalary)
+                        var sql = "INSERT INTO role (title, salary, department_id) VALUES ?"; // reference from :: https://www.w3schools.com/nodejs/nodejs_mysql_insert.asp
+                        var values = [
+                            [roleName, roleSalary, departmentId.id]
+                        ];
+
+                        db.query(sql, [values], function (err, result) {
+                            title: roleName;
+                            salary: roleSalary;
+                            department_id: departmentId.id
+
+                            // department_id: roleDepartment
+                            console.log(`Added New Role.`)
+                        })
+                    })
             })
+
+
         };
 
 
