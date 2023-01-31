@@ -84,6 +84,7 @@ function init() {
 
                 const roles = result.map(({ title }) => ({ name: title }));
 
+
                 inquirer.prompt([
                     {
                         type: 'input',
@@ -127,21 +128,21 @@ function init() {
                     console.log(answers);
                     const firstName = answers.firstName;
                     const lastName = answers.lastName;
-                    const managerId = answers.employeeManager;
+                    // const managerId = answers.employeeManager;
 
 
 
                     // console.log(firstName, lastName, employee_Role.id, employee_Manager.id)
-                    var sql = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ?"; // reference from :: https://www.w3schools.com/nodejs/nodejs_mysql_insert.asp
+                    var sql = "INSERT INTO employee (first_name, last_name, role_id) VALUES ?"; // reference from :: https://www.w3schools.com/nodejs/nodejs_mysql_insert.asp
                     var values = [
-                        [firstName, lastName, employee_Role.id, managerId]
+                        [firstName, lastName, employee_Role.id]
                     ];
 
                     db.query(sql, [values], function (err, result) {
-                        first_name: firstName
-                        last_name: lastName
-                        role_id: employee_Role.id
-                        manager_id: managerId
+                        // first_name: firstName
+                        // last_name: lastName
+                        // role_id: employee_Role.id
+                        // manager_id: managerId
                         console.log(`Added New Employeee`)
                     })
                     init()
@@ -161,7 +162,7 @@ function init() {
                         name: 'employeeName',
                         message: 'Which employee’s role do you want to update?',
                         choices: () => {
-                            const employee = result.map(({ id, first_name, last_name }) => ({ value: id, name: first_name + '' + last_name }));
+                            const employee = result.map(({ first_name, last_name }) => ({ name: first_name + '' + last_name }));
                             return employee
                         }
 
@@ -191,7 +192,7 @@ function init() {
 
                             for (var i = 0; i < result.length; i++) {
                                 if (result[i].title === answers.newRole) {
-                                    var role = result[i].id;
+                                    var role = result[i];
                                 }
                             }
 
