@@ -12,7 +12,7 @@ app.use(express.json());
 // connect to database
 const db = mysql.createConnection(
     {
-        host: 'localhost',
+        host: '127.0.0.1',
         // MySql username:
         user: 'root',
         // MYSQL password:
@@ -82,9 +82,9 @@ function init() {
         if (answers.option === 'Add_Employee') {
             db.query(`SELECT * FROM role`, function (err, result) {
 
-                const roles = result.map(({ title }) => ({ name: title }));
+                const roles = result.map(({ title }) => ({ name: title })); // All roles
 
-
+                // Questions for new employee
                 inquirer.prompt([
                     {
                         type: 'input',
@@ -102,53 +102,53 @@ function init() {
                         message: 'What is the employee’s role?',
                         choices: roles
 
-                    },
-                    {
-                        type: 'list',
-                        name: 'employeeManager',
-                        message: 'Who is the employee’s manager?',
-                        choices:
-                            [
-                                'None',
-                                'John Doe',
-                                'Mike chan',
-                                'Ashley Rodriguez',
-                                'Kevin Tupik',
-                                'Kuala Singh',
-                                'Mail Brown'
-                            ]
                     }
+
                 ]).then(answers => {
                     for (var i = 0; i < result.length; i++) {
                         if (result[i].title === answers.employeeRole) {
                             var employee_Role = result[i];
                         }
-                    }
-
-                    console.log(answers);
-                    const firstName = answers.firstName;
-                    const lastName = answers.lastName;
-                    // const managerId = answers.employeeManager;
+                    };
 
 
+                    const firstName = answers.firstName  // new employee's first name
+                    const lastName = answers.lastName // // new employee's last name
 
-                    // console.log(firstName, lastName, employee_Role.id, employee_Manager.id)
-                    var sql = "INSERT INTO employee (first_name, last_name, role_id) VALUES ?"; // reference from :: https://www.w3schools.com/nodejs/nodejs_mysql_insert.asp
-                    var values = [
-                        [firstName, lastName, employee_Role.id]
-                    ];
 
-                    db.query(sql, [values], function (err, result) {
-                        // first_name: firstName
-                        // last_name: lastName
-                        // role_id: employee_Role.id
-                        // manager_id: managerId
-                        console.log(`Added New Employeee`)
-                    })
-                    init()
-                })
+                    db.query(`SELECT * FROM employee`, function (err, result) {
 
-            })
+                        const manager = result.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }))
+
+                        inquirer.prompt([
+                            {
+                                type: 'list',
+                                name: 'employeeManager',
+                                message: 'Who is the employee’s manager?',
+                                choices: manager
+                            }
+
+                        ]).then(answers => {
+                            const managerName = answers.employeeManager
+
+                            var sql = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ?"; // reference from :: https://www.w3schools.com/nodejs/nodejs_mysql_insert.asp
+                            var values = [
+                                [firstName, lastName, employee_Role.id, managerName]
+                            ];
+
+                            db.query(sql, [values], function (err, result) {
+
+                                console.log(`Added New Employeee`)
+                            })
+                            init()
+                        })
+
+                    });
+
+
+                });
+
+            });
 
         };
 
@@ -165,14 +165,14 @@ function init() {
                             const employee = result.map(({ first_name, last_name }) => ({ name: first_name + '' + last_name }));
                             return employee
                         }
-
                     }
-
-
                 ]).then(answers => {
-                    console.log(answers);
-                    const employeeName = answers.employeeName
-
+                    for (var i = 0; i < result.length; i++) {
+                        if (result[i].first_name + '' + result[i].last_name === answers.employeeName) {
+                            var employeeName = result[i];
+                        }
+                    }
+                    // console.log(employeeName.id)
                     db.query(`SELECT * FROM role`, function (err, result) {
                         inquirer.prompt([
                             {
@@ -184,42 +184,26 @@ function init() {
                                     return roles
 
                                 }
-
                             }
                         ]).then(answers => {
-                            console.log(answers);
-
 
                             for (var i = 0; i < result.length; i++) {
                                 if (result[i].title === answers.newRole) {
                                     var role = result[i];
                                 }
                             }
+                            // console.log(role.id)
+                            var sql = `UPDATE employee SET role_id = ${role.id} WHERE id = ${employeeName.id}`;
 
-
-                            var sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
-                            var values = [
-                                [role, employeeName]
-                            ];
-                            db.query(sql, [values], function (err, result) {
+                            db.query(sql, function (err, result) {
 
                                 console.log(`Updated Employee's New Role.`)
                                 init()
                             })
-
-
-
                         })
-
-
                     })
                 })
-
-
-
             })
-
-
         };
 
         // Add New Role
