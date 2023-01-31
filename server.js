@@ -3,9 +3,6 @@ const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
 
-
-
-
 const PORT = process.env.PORT || 3001;
 const app = express();
 
@@ -24,44 +21,6 @@ const db = mysql.createConnection(
     },
     console.log(`Connected to the employee_db database`)
 )
-
-
-
-// Query database
-
-
-// let viewAllDept = [];
-// const deptSql = 'SELECT * FROM department'
-// db.query(deptSql, (err, data) => {
-//     if (err) throw err;
-
-//     const dept = data.map(({ name }) => ({ name: name }));
-
-//     viewAllDept.push(dept)
-//     // console.log(viewAllDept)
-
-// })
-
-
-
-
-
-
-
-
-
-
-
-
-db.query('SELECT * FROM role', function (err, results) {
-    // console.log(results);
-});
-
-
-
-db.query('SELECT * FROM employee', function (err, results) {
-    // console.table(results);
-});
 
 // inquirer questions
 const question = [
@@ -82,61 +41,26 @@ const department = [
     }
 ];
 
-// To add a role
-// const role = [
-//     {
-//         type: 'input',
-//         name: 'role_name',
-//         message: 'What is the name of the role?'
-//     },
-//     {
-//         type: 'input',
-//         name: 'role_salary',
-//         message: 'What is the salary of the role?'
-//     },
-
-//     {
-//         type: 'list',
-//         name: 'role_department',
-//         message: 'Which department does the role belong to?',
-//         choices: () => {
-//             let viewAllDept = [];
-//             const deptSql = 'SELECT * FROM department'
-//             db.query(deptSql, (err, data) => {
-//                 if (err) throw err;
-
-//                 const dept = data.map(({ name }) => ({ name: name }));
-
-//                 viewAllDept.push(dept)
-//                 return viewAllDept;
-
-//             })
-//         }
-//     }
-// ];
-
-// to add employee
-
-
-
-
+// init function for inquirer question & response
 function init() {
     inquirer.prompt(question).then(answers => {
+
+        // View All Employees
         if (answers.option === 'View All Employees') {
+            // reference : https://www.w3schools.com/sql/func_sqlserver_concat.asp
             db.query(`SELECT employee.id AS ID, employee.first_name AS First_Name, employee.last_name AS LAST_Name, role.title AS Title, role.salary AS Salary, department.name AS Department,
-            manager_id AS manager
-            from employee
-            INNER JOIN role ON employee.role_id = role.id
-            INNER JOIN department ON role.department_id = department.id
-            
-        
-            `,
+            CONCAT (manager.first_name, " ", manager.last_name) AS manager  
+            FROM employee
+                   LEFT JOIN role ON employee.role_id = role.id
+                   LEFT JOIN department ON role.department_id = department.id
+                   LEFT JOIN employee manager ON employee.manager_id = manager.id`,
                 function (err, results) {
                     console.table(results);
                     init()
                 })
         };
 
+        // View All Roles
         if (answers.option === 'View All Roles') {
             db.query(`SELECT role.id AS id, role.title AS title, role.salary as salary, department.name as department
                 FROM role 
@@ -146,13 +70,15 @@ function init() {
             })
         };
 
+        // View All Departments
         if (answers.option === 'View All Departments') {
             db.query('SELECT * FROM department', function (err, results) {
                 console.table(results);
                 init()
             })
         };
-        // Add employee
+
+        // Add  New Employee
         if (answers.option === 'Add_Employee') {
             db.query(`SELECT * FROM role`, function (err, result) {
 
@@ -225,6 +151,7 @@ function init() {
 
         };
 
+        // Update Employee Role
         if (answers.option === 'Update Employee Role') {
             db.query(`SELECT * FROM employee`, function (err, result) {
                 // To update the employee Role
@@ -234,7 +161,7 @@ function init() {
                         name: 'employeeName',
                         message: 'Which employee’s role do you want to update?',
                         choices: () => {
-                            const employee = result.map(({ first_name, last_name }) => ({ name: first_name + '' + last_name }));
+                            const employee = result.map(({ id, first_name, last_name }) => ({ value: id, name: first_name + '' + last_name }));
                             return employee
                         }
 
@@ -252,19 +179,38 @@ function init() {
                                 name: 'newRole',
                                 message: 'What role do you want to assign the selected employee?',
                                 choices: () => {
-                                    const role = result.map(({ title }) => ({ name: title }));
-                                    return role
+                                    const roles = result.map(({ title }) => ({ name: title }));
+                                    return roles
+
                                 }
 
                             }
-                        ])
+                        ]).then(answers => {
+                            console.log(answers);
 
-                        // db.query(sql, [values], function (err, result) {
-                        //     title: employeeName;
-                        //     salary: updatedRole;
-                        //     console.log(`Updated Employee's New Role.`)
-                        //     init()
-                        // })
+
+                            for (var i = 0; i < result.length; i++) {
+                                if (result[i].title === answers.newRole) {
+                                    var role = result[i].id;
+                                }
+                            }
+
+
+                            var sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+                            var values = [
+                                [role, employeeName]
+                            ];
+                            db.query(sql, [values], function (err, result) {
+
+                                console.log(`Updated Employee's New Role.`)
+                                init()
+                            })
+
+
+
+                        })
+
+
                     })
                 })
 
@@ -275,6 +221,7 @@ function init() {
 
         };
 
+        // Add New Role
         if (answers.option === 'Add Role') {
 
             db.query(`SELECT * FROM department`, function (err, result) {
@@ -321,6 +268,7 @@ function init() {
                             title: roleName;
                             salary: roleSalary;
                             department_id: departmentId.id
+                            init()
 
                             // department_id: roleDepartment
                             console.log(`Added New Role.`)
@@ -331,7 +279,7 @@ function init() {
 
         };
 
-
+        // Add New Department
         if (answers.option === 'Add Department') {
             inquirer.prompt(department).then(answers => {
                 console.log(answers);
@@ -341,6 +289,7 @@ function init() {
                 db.query(sql, newDept, function (err, result) {
                     name: newDept;
                     console.log(`Added New Department`)
+                    init()
                 })
 
             })
@@ -350,10 +299,11 @@ function init() {
 };
 
 
-
+// To run init function
 init()
 // Default response for any bad request
 app.use((req, res) => { res.status(404).end() });
+
 
 app.listen(PORT, () => {
     console.log(`server running on ${PORT}`);
