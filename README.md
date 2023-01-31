@@ -1,7 +1,7 @@
 # Employee_Tracker
 
 
-In this project, I developed an application that makes it simple for users to able to write and save notes.
+In this project, I developed an employee tracker app that makes it simple to manage a company's employee database.
 
 
 ## Table of Contents
